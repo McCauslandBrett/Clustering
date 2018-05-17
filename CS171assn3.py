@@ -29,6 +29,19 @@ def accuracy(ypred,ytest):
      if(ytest[i] == ypred[i]):
          c += 1
  return(c/float(len(ytest)) * 100.0)
+def Rowneighbors(X_train, X_test,k,p):
+   d = []
+   neighbors = []
+   trainsize = len(X_train)
+
+   for i in range(trainsize):
+     dist = minkowskiDist(X_train[i],X_test,p)
+     d.append((dist,i))
+   #sort by dist
+   d.sort(key=operator.itemgetter(0))
+   for i in range(k):
+     neighbors.append(d[i])
+   return neighbors
 
 # assign each point to the set corresponding to the closest centroid
 def assignClassification(centroids,X_input):
@@ -54,56 +67,45 @@ def assignClassification(centroids,X_input):
    cAssign[row]=best[1]
    d.clear()
  return cAssign
-
-def Rowneighbors(X_train, X_test,k,p):
-   d = []
-   neighbors = []
-   trainsize = len(X_train)
-
-   for i in range(trainsize):
-     dist = minkowskiDist(X_train[i],X_test,p)
-     d.append((dist,i))
-   #sort by dist
-   d.sort(key=operator.itemgetter(0))
-   for i in range(k):
-     neighbors.append(d[i])
-   return neighbors
-
 #calculate the centroids with meancluster 
 #add all fetures/columns together with same cluster values
 #divide colums by the number of occurances k_count
 def meancluster(centroids,X_input,cAssign ):
+
  K=centroids.shape[0]
+ k_counts=[]
  for k in range(K):
    k_counts.append(0)
  numRows=X_input.shape[0]
  numCol=X_input.shape[0]
- meancluster=centroids
- #meancluster[:] = 0
+
+ mc=centroids
+ mc[:] = 0
+ print(mc)
+
  
+ #talle column values and take k count
  for i in range(numRows):
    for j in range(numCol):
-     #meancluster[cAssign[i],j]+= X_input[i,j]
-     #k_counts[cAssign[i]]+=1
-     print('f python')
+     #mc.iloc[cAssign[i],j]+= X_input.iloc[i,j]
+     print(cAssign[i])
+     k_counts[cAssign[i]]+=1
+ #print(k_counts)
  for k in range(K):
-   for j in range(numCol):
-     print('f python')
-     #meancluster[k,j]= meancluster[k,j]/k_counts[k]
-     #centroids=meancluster
-   #meancluster[:] = 0
-   k_counts.fill(0)
- print('k_counts:',k_counts)
+   for j in range(numCol): 
+     c=1
+     #mc[k,j]= mc[k,j]/k_counts[k]
+     #centroids=mc
+  # mc[:] = 0
+  
+# print('k_counts:',k_counts)
  return
 def k_means(X_input, K,centroids):
   
-  meancluster=centroids
-  meancluster[:] = 0
-  numRows=X_input.shape[0]
   max_iteration=30
-  
   #this is a (data point x 1) vector 
   cAssign=[]
+  
 # Repeat until nothing is moved around, or some max iteration
   for iteration in range(max_iteration):
     cAssign=assignClassification(centroids,X_input)
@@ -124,16 +126,12 @@ def k_means(X_input, K,centroids):
   
   k_means(X_input, K,centroid)
  
-    
-  
-  
-  
   
   
   """
   
   
-  print('hello')
+
   
  
   meancluster=centroids
