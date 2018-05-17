@@ -150,9 +150,12 @@ def k_means(X_input, K,centroids):
  # assign each point to the set corresponding to the closest centroid
    for row in range(numRows):
         for k in range(K):
-            print('centroids',centroids)
-            print('X_input[row]',X_input.iloc[row,:])
-            #dist= minkowskiDist(centroids[k],X_input[row],2)
+            #print('centroids',centroids)
+            #print('X_input[row]',X_input.iloc[row,:])
+            #c=list(centroids.iloc[0])
+            #print(c)
+            #dist= minkowskiDist(list(centroids[k]),list(X_input[row]),2)
+            dist= minkowskiDist(list(centroids.iloc[k]),list(X_input.iloc[row]),2)
             d.append([dist,k])
         #d.sort(key=operator.itemgetter(0))
         #cAssign[row]=d[0].itemgetter(1)
