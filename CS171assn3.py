@@ -48,6 +48,7 @@ def assignClassification(centroids,X_input):
  
  # assign each point to the set corresponding to the closest centroid
  K=centroids.shape[0]
+ #print(centroids)
  cAssign=[]
  numRows=X_input.shape[0]
  d=[]
@@ -57,7 +58,6 @@ def assignClassification(centroids,X_input):
  for i in range(numRows):
    cAssign.append(i%K)
 
- 
  for row in range(numRows):
    for k in range(K):
      dist= minkowskiDist(list(centroids.iloc[k]),list(X_input.iloc[row]),2)
@@ -66,6 +66,7 @@ def assignClassification(centroids,X_input):
    best=d[0]
    cAssign[row]=best[1]
    d.clear()
+ print('cAssign',cAssign)
  return cAssign
 #calculate the centroids with meancluster 
 #add all fetures/columns together with same cluster values
@@ -77,34 +78,35 @@ def meancluster(centroids,X_input,cAssign ):
  for k in range(K):
    k_counts.append(0)
  numRows=X_input.shape[0]
- numCol=X_input.shape[0]
-
+ numCol=X_input.shape[1]
+ print('cAssign',cAssign)
  mc=centroids
  mc[:] = 0
- print(mc)
 
- 
  #talle column values and take k count
  for row in range(numRows):
+   Xrow= list(X_input.iloc[row])
+   Addr= cAssign[row]
+   MCrow=list(mc.iloc[Addr])
+   k_counts[Addr]+=1
    for col in range(numCol):
-     #temp= X_input.iloc[row,col]
-     #print('temp',temp)
-     #temp=mc.iloc[cAssign[i],j]+temp
-     #k_counts[cAssign[i]]+=1
- #print(k_counts)
- for k in range(K):
-   for j in range(numCol): 
-     c=1
-     #mc[k,j]= mc[k,j]/k_counts[k]
-     #centroids=mc
-  # mc[:] = 0
-  
-# print('k_counts:',k_counts)
+     Sum= Xrow[col]+ MCrow[col]
+     print('Sum',Sum)
+     mc.iloc[Addr,col]=Sum
+   #print(k_counts)
+ for row in range(K):
+   for col in range(numCol): 
+     value=mc.iloc[row,col]
+     print('value',value)
+     D=k_counts[row]
+     print('D',D)
+     mc.iloc[row,col]= (value/D)
+ centroids=mc
   
  return
 def k_means(X_input, K,centroids):
   
-  max_iteration=30
+  max_iteration=5
   #this is a (data point x 1) vector 
   cAssign=[]
   
@@ -127,7 +129,7 @@ def k_means(X_input, K,centroids):
   centroid=X_input.iloc[0:K,:]
   a= X_input.iloc[0,1]
   
-  k_means(X_input, K,centroid)
+  cAssign = k_means(X_input, K,centroid)
  
   
   
