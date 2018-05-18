@@ -85,11 +85,12 @@ def meancluster(centroids,X_input,cAssign ):
 
  
  #talle column values and take k count
- for i in range(numRows):
-   for j in range(numCol):
-     #mc.iloc[cAssign[i],j]+= X_input.iloc[i,j]
-     print(cAssign[i])
-     k_counts[cAssign[i]]+=1
+ for row in range(numRows):
+   for col in range(numCol):
+     #temp= X_input.iloc[row,col]
+     #print('temp',temp)
+     #temp=mc.iloc[cAssign[i],j]+temp
+     #k_counts[cAssign[i]]+=1
  #print(k_counts)
  for k in range(K):
    for j in range(numCol): 
@@ -99,6 +100,7 @@ def meancluster(centroids,X_input,cAssign ):
   # mc[:] = 0
   
 # print('k_counts:',k_counts)
+  
  return
 def k_means(X_input, K,centroids):
   
@@ -123,6 +125,7 @@ def k_means(X_input, K,centroids):
   #Y_input = data.iloc[ :, -1:]   
   K=3
   centroid=X_input.iloc[0:K,:]
+  a= X_input.iloc[0,1]
   
   k_means(X_input, K,centroid)
  
