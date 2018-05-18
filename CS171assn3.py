@@ -71,36 +71,36 @@ def assignClassification(centroids,X_input):
 #calculate the centroids with meancluster 
 #add all fetures/columns together with same cluster values
 #divide colums by the number of occurances k_count
-def meancluster(centroids,X_input,cAssign ):
+def meancluster(centroids,X_input,clusterAssign ):
 
- K=centroids.shape[0]
+ numCentroids=centroids.shape[0]
  k_counts=[]
- for k in range(K):
+ for k in range(numCentroids):
    k_counts.append(0)
  numRows=X_input.shape[0]
  numCol=X_input.shape[1]
- print('cAssign',cAssign)
+ print('clusterAssign',clusterAssign)
  mc=centroids
  mc[:] = 0
 
  #talle column values and take k count
  for row in range(numRows):
    Xrow= list(X_input.iloc[row])
-   Addr= cAssign[row]
+   Addr= clusterAssign[row]
    MCrow=list(mc.iloc[Addr])
    k_counts[Addr]+=1
    for col in range(numCol):
      Sum= Xrow[col]+ MCrow[col]
-     print('Sum',Sum)
+     #print('Sum',Sum)
      mc.iloc[Addr,col]=Sum
    #print(k_counts)
- for row in range(K):
+ for k in range(numCentroids):
    for col in range(numCol): 
-     value=mc.iloc[row,col]
+     value=mc.iloc[k,col]
      print('value',value)
-     D=k_counts[row]
+     D=k_counts[k]
      print('D',D)
-     mc.iloc[row,col]= (value/D)
+     mc.iloc[k,col]= (value/D)
  centroids=mc
   
  return
@@ -116,61 +116,58 @@ def k_means(X_input, K,centroids):
     meancluster(centroids,X_input,cAssign )
   return cAssign
 
+def Gatherclasses(data,classranges):
+ classes = data.iloc[:,4].values
+ length = data.iloc[:,4].size
+ classranges.append(0)
+ flowertype=classes[0]
+
+ for count in range(length):
+  if(flowertype!=classes[count]):
+    classranges.append(count)
+    flowertype=classes[count]
+ classranges.append(length)
+ return
+def computeSSE(centroids,df):
+ df.sort_values("class", inplace=True)
+ classranges=[]
+ Gatherclasses(df,classranges)
+
+ Sum=0
+ for everycluster in range(len(classranges)-1):
+    temp=0
+    cluster=df.iloc[classranges[everycluster]:classranges[everycluster+1],:-1]
+    numRows=cluster.shape[0]
+    for row in range(numRows):
+       dist= minkowskiDist(list(centroids.iloc[everycluster]),list(cluster.iloc[row]),2)
+       temp+=dist
+    Sum+=temp
+ return Sum
+  
 #----------- Question 1: k-Means----------
 # 1)
    #import the data set
-  data=pd.read_csv('IrisDataSet.csv')
+ data=pd.read_csv('IrisDataSet.csv')
    #shuffle the data
-  data = data.sample(frac=1).reset_index(drop=True)
+ data = data.sample(frac=1).reset_index(drop=True)
    #feature matrix input
-  X_input = data.iloc[:,:-1]    
-  #Y_input = data.iloc[ :, -1:]   
-  K=3
-  centroid=X_input.iloc[0:K,:]
-  a= X_input.iloc[0,1]
-  
-  cAssign = k_means(X_input, K,centroid)
+ X_input = data.iloc[:,:-1]    
+ Y_input = data.iloc[ :, -1:]   
  
+ df=data
   
-  
-  """
-  
-  
+ K=3
+ centroid=X_input.iloc[0:K,:]
 
-  
  
-  meancluster=centroids
-  meancluster[:] = 0
-  k_counts = [0] * K
+ cAssign = k_means(X_input, K,centroid)
+ df.iloc[:,-1]=cAssign
+ catch=computeSSE(centroid,df)
+ 
+"""
+ df.sort_values("class", inplace=True)
+ classranges=[]
+ Gatherclasses(df,classranges)
+ cluster=df.iloc[classranges[0]:classranges[0+1],:-1]
+"""  
   
-  numRows=X_input.shape[0]
-  numCol=X_input.shape[1]
-  max_iteration=30
-  print(numRows)
-  d=[]
-#this is a (data point x 1) vector that contains 
-#the cluster number that each data point is assigned to.
-  cAssign=[]
-
-# Partition the data at random into k sets
-  for i in range(numRows):
-   cAssign.append(i%K)
-  print('hello')
-
-# Repeat until nothing is moved around, or some max iteration
-  for iteration in range(max_iteration):
-   cAssign=assignClassification(centroids,X_input)
-    for i in range(numRows):
-     for j in range(numCol):
-       #meancluster[cAssign[i],j]+= X_input[i,j]
-       #k_counts[cAssign[i]]+=1
-       #divide colums by the number of occurances k_count
-    for k in range(K):
-     for j in range(numCol):
-       meancluster[k,j]= meancluster[k,j]/k_counts[k]
-  centroids=meancluster
-  print('hello')
-  meancluster[:] = 0
-  print('hello agian')
-  k_counts.fill(0)
-    """ 
