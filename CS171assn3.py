@@ -30,7 +30,7 @@ def minkowskiDist(list_R,list_Rn,p):
 def assignClassification(df_centroids,df_Xinput):
  
  # assign each point to the set corresponding to the closest centroid
- K=centroids.shape[0]
+ K=df_centroids.shape[0]
  #print(centroids)
  cAssign=[]
  numRows=df_Xinput.shape[0]
@@ -139,9 +139,9 @@ def computeSSE(df_centroids,df):
  for everycluster in range(len(list_classranges)-1):
     temp=0
     df_cluster=df.iloc[list_classranges[everycluster]:list_classranges[everycluster+1],:-1]
-    numRows=cluster.shape[0]
+    numRows=df_cluster.shape[0]
     for row in range(numRows):
-       dist= minkowskiDist(list(df_centroids.iloc[everycluster]),list(cluster.iloc[row]),2)
+       dist= minkowskiDist(list(df_centroids.iloc[everycluster]),list(df_cluster.iloc[row]),2)
        temp+=dist
     Sum+=temp
  return Sum
