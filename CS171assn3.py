@@ -71,7 +71,7 @@ def assignClassification(centroids,X_input):
 #calculate the centroids with meancluster 
 #add all fetures/columns together with same cluster values
 #divide colums by the number of occurances k_count
-def meancluster(centroids,X_input,clusterAssign ):
+def getCentroid(centroids,X_input,clusterAssign ):
 
  numCentroids=centroids.shape[0]
  k_counts=[]
@@ -82,38 +82,42 @@ def meancluster(centroids,X_input,clusterAssign ):
  print('clusterAssign',clusterAssign)
  mc=centroids
  mc[:] = 0
-
+ print('mc',mc)
  #talle column values and take k count
  for row in range(numRows):
    Xrow= list(X_input.iloc[row])
+   print('Xrow',Xrow)
    Addr= clusterAssign[row]
-   MCrow=list(mc.iloc[Addr])
+   print('Addr',Addr)
    k_counts[Addr]+=1
+   print('k_counts',k_counts)
    for col in range(numCol):
-     Sum= Xrow[col]+ MCrow[col]
-     #print('Sum',Sum)
-     mc.iloc[Addr,col]=Sum
-   #print(k_counts)
+     Sum= Xrow[col]
+     print('Sum',Sum)
+     mc.iloc[Addr,col]+=Sum
+     print('mc.iloc[Addr,col]',mc.iloc[Addr,col])
  for k in range(numCentroids):
    for col in range(numCol): 
      value=mc.iloc[k,col]
-     print('value',value)
+     #print('value',value)
      D=k_counts[k]
-     print('D',D)
+     #print('D',D)
+    # print('should be:',(value/D))
      mc.iloc[k,col]= (value/D)
- centroids=mc
-  
- return
+    # print('is:',mc.iloc[k,col])
+ print('mc',mc)
+ return mc
 def k_means(X_input, K,centroids):
   
-  max_iteration=5
+  max_iteration=3
   #this is a (data point x 1) vector 
   cAssign=[]
   
 # Repeat until nothing is moved around, or some max iteration
   for iteration in range(max_iteration):
     cAssign=assignClassification(centroids,X_input)
-    meancluster(centroids,X_input,cAssign )
+    centroids=getCentroid(centroids,X_input,cAssign)
+    print('centroids',centroids)
   return cAssign
 
 def Gatherclasses(data,classranges):
@@ -150,16 +154,14 @@ def computeSSE(centroids,df):
  data=pd.read_csv('IrisDataSet.csv')
    #shuffle the data
  data = data.sample(frac=1).reset_index(drop=True)
-   #feature matrix input
+ #feature matrix input
  X_input = data.iloc[:,:-1]    
  Y_input = data.iloc[ :, -1:]   
  
- df=data
-  
+ df=data  
  K=3
  centroid=X_input.iloc[0:K,:]
-
- 
+ save=centroid
  cAssign = k_means(X_input, K,centroid)
  df.iloc[:,-1]=cAssign
  catch=computeSSE(centroid,df)
