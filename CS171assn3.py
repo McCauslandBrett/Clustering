@@ -131,13 +131,11 @@ def computeSSE(df_centroids,df):
 
  Sum=0
  for everycluster in range(len(list_classranges)-1):
-    temp=0
     df_cluster=df.iloc[list_classranges[everycluster]:list_classranges[everycluster+1],:-1]
     numRows=df_cluster.shape[0]
     for row in range(numRows):
        dist= minkowskiDist(list(df_centroids.iloc[everycluster]),list(df_cluster.iloc[row]),2)
-       temp+=dist
-    Sum+=temp
+       Sum+=dist
  return Sum
   
 #----------- Question 1: k-Means----------
