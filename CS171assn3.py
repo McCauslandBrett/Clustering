@@ -22,35 +22,16 @@ def minkowskiDist(R,Rn,p):
     sum = sum + pow((abs(R[i]-Rn[i])),p)
   fp= 1/p
   return pow(sum,fp)
-#performance measures:
-def accuracy(ypred,ytest):
- c = 0
- for i in range(len(ytest)):
-     if(ytest[i] == ypred[i]):
-         c += 1
- return(c/float(len(ytest)) * 100.0)
-def Rowneighbors(X_train, X_test,k,p):
-   d = []
-   neighbors = []
-   trainsize = len(X_train)
 
-   for i in range(trainsize):
-     dist = minkowskiDist(X_train[i],X_test,p)
-     d.append((dist,i))
-   #sort by dist
-   d.sort(key=operator.itemgetter(0))
-   for i in range(k):
-     neighbors.append(d[i])
-   return neighbors
-
-# assign each point to the set corresponding to the closest centroid
-def assignClassification(centroids,X_input):
+#precondiotion:
+#postcondition:
+def assignClassification(df_centroids,df_Xinput):
  
  # assign each point to the set corresponding to the closest centroid
  K=centroids.shape[0]
  #print(centroids)
  cAssign=[]
- numRows=X_input.shape[0]
+ numRows=df_Xinput.shape[0]
  d=[]
  
  #create assignment vector of correct size
@@ -60,7 +41,7 @@ def assignClassification(centroids,X_input):
 
  for row in range(numRows):
    for k in range(K):
-     dist= minkowskiDist(list(centroids.iloc[k]),list(X_input.iloc[row]),2)
+     dist= minkowskiDist(list(df_centroids.iloc[k]),list(df_Xinput.iloc[row]),2)
      d.append([dist,k])
    d.sort(key=operator.itemgetter(0))
    best=d[0]
@@ -71,54 +52,54 @@ def assignClassification(centroids,X_input):
 #calculate the centroids with meancluster 
 #add all fetures/columns together with same cluster values
 #divide colums by the number of occurances k_count
-def getCentroid(centroids,X_input,clusterAssign ):
+ 
+#precondiotion:
+#postcondition:
+def getCentroid(df_centroids,df_Xinput,list_clusterAssign):
 
- numCentroids=centroids.shape[0]
+ numCentroids=df_centroids.shape[0]
  k_counts=[]
  for k in range(numCentroids):
    k_counts.append(0)
- numRows=X_input.shape[0]
- numCol=X_input.shape[1]
- print('clusterAssign',clusterAssign)
- mc=centroids
+ numRows=df_Xinput.shape[0]
+ numCol=df_Xinput.shape[1]
+ mc=df_centroids
  mc[:] = 0
- print('mc',mc)
+ 
  #talle column values and take k count
  for row in range(numRows):
-   Xrow= list(X_input.iloc[row])
-   print('Xrow',Xrow)
-   Addr= clusterAssign[row]
-   print('Addr',Addr)
+   Xrow= list(df_Xinput.iloc[row])
+   Addr= list_clusterAssign[row]
    k_counts[Addr]+=1
-   print('k_counts',k_counts)
    for col in range(numCol):
      Sum= Xrow[col]
-     print('Sum',Sum)
      mc.iloc[Addr,col]+=Sum
-     print('mc.iloc[Addr,col]',mc.iloc[Addr,col])
  for k in range(numCentroids):
    for col in range(numCol): 
      value=mc.iloc[k,col]
-     #print('value',value)
      D=k_counts[k]
-     #print('D',D)
-    # print('should be:',(value/D))
      mc.iloc[k,col]= (value/D)
-    # print('is:',mc.iloc[k,col])
- print('mc',mc)
  return mc
-def k_means(X_input, K,centroids):
+
+#precondiotion: 
+#   df_centoid has been initialized with k rows x feature
+#   df_Xinput has been initialized with rows x feature
+#   int_k has no purpose
+#postcondition:
+     #returns a list of cluster assignments where 
+     #index maps to df_Xinput 
+#   centroid in invertainly changes value
+def k_means(df_Xinput, int_k,df_centroids):
   
-  max_iteration=3
+  max_iteration=5
   #this is a (data point x 1) vector 
-  cAssign=[]
+  list_clustAssign=[]
   
 # Repeat until nothing is moved around, or some max iteration
   for iteration in range(max_iteration):
-    cAssign=assignClassification(centroids,X_input)
-    centroids=getCentroid(centroids,X_input,cAssign)
-    print('centroids',centroids)
-  return cAssign
+    list_clustAssign=assignClassification(df_centroids,df_Xinput)
+    df_centroids=getCentroid(df_centroids,df_Xinput,list_clustAssign)
+  return list_clustAssign
 
 def Gatherclasses(data,classranges):
  classes = data.iloc[:,4].values
@@ -132,6 +113,9 @@ def Gatherclasses(data,classranges):
     flowertype=classes[count]
  classranges.append(length)
  return
+
+#precondition:
+#postcondition:
 def computeSSE(centroids,df):
  df.sort_values("class", inplace=True)
  classranges=[]
@@ -162,10 +146,25 @@ def computeSSE(centroids,df):
  K=3
  centroid=X_input.iloc[0:K,:]
  save=centroid
+ print('centroid',centroid)
  cAssign = k_means(X_input, K,centroid)
- df.iloc[:,-1]=cAssign
- catch=computeSSE(centroid,df)
+ #----------- Question 2: k-Means Evaluation----------
+ data=pd.read_csv('IrisDataSet.csv')
+ x=[]
+ y=[]
+ for k in range(1,5):
+   data = data.sample(frac=1).reset_index(drop=True)
+   df=data
+   X_input = data.iloc[:,:-1]
+   centroid=X_input.iloc[0:k,:]
+   cAssign=k_means(X_input, k,centroid)
+   df.iloc[:,-1]=cAssign
+   catch=computeSSE(centroid,df)
+   y.append(catch)
+   x.append(k)
+ plt.scatter(x,y)
  
+     
 """
  df.sort_values("class", inplace=True)
  classranges=[]
