@@ -29,28 +29,22 @@ def minkowskiDist(list_R,list_Rn,p):
 #postcondition:
 def assignClassification(df_centroids,df_Xinput):
  
- # assign each point to the set corresponding to the closest centroid
- K=df_centroids.shape[0]
- #print(centroids)
- cAssign=[]
+
+ numCentroids=df_centroids.shape[0] 
  numRows=df_Xinput.shape[0]
- d=[]
- 
- #create assignment vector of correct size
- #initialized at random
- for i in range(numRows):
-   cAssign.append(i%K)
+ list_clusterAssignmets=[0] * numRows
+ list_tuple_dist=[]
+
 
  for row in range(numRows):
-   for k in range(K):
+   for k in range(numCentroids):
      dist= minkowskiDist(list(df_centroids.iloc[k]),list(df_Xinput.iloc[row]),2)
-     d.append([dist,k])
-   d.sort(key=operator.itemgetter(0))
-   best=d[0]
-   cAssign[row]=best[1]
-   d.clear()
- print('cAssign',cAssign)
- return cAssign
+     list_tuple_dist.append([dist,k])
+   list_tuple_dist.sort(key=operator.itemgetter(0))
+   tuple_best=list_tuple_dist[0]
+   list_clusterAssignmets[row]=tuple_best[1]
+   list_tuple_dist.clear()
+ return list_clusterAssignmets
  
  
 #precondiotion:
