@@ -15,11 +15,13 @@ from operator import itemgetter, attrgetter
 from sklearn.preprocessing import Imputer
 from sklearn.cross_validation import train_test_split
 
-def minkowskiDist(R,Rn,p):
+#precondiotion:
+#postcondition:
+def minkowskiDist(list_R,list_Rn,p):
   sum=0
-  count=len(R)
+  count=len(list_R)
   for i in range(count):
-    sum = sum + pow((abs(R[i]-Rn[i])),p)
+    sum = sum + pow((abs(list_R[i]-list_Rn[i])),p)
   fp= 1/p
   return pow(sum,fp)
 
@@ -49,22 +51,24 @@ def assignClassification(df_centroids,df_Xinput):
    d.clear()
  print('cAssign',cAssign)
  return cAssign
-#calculate the centroids with meancluster 
-#add all fetures/columns together with same cluster values
-#divide colums by the number of occurances k_count
+ 
  
 #precondiotion:
+#  list_clusterAssign: initialized with class assignments for df_Xinput
+#  list_clusterAssign is used to map to correct centroid
+#  df_Xinput: contains the feature matrix
 #postcondition:
+#   returns a dataframe df_meanCentroid with the new centroids
 def getCentroid(df_centroids,df_Xinput,list_clusterAssign):
 
  numCentroids=df_centroids.shape[0]
- k_counts=[]
+ k_counts=[] #divide colums by the number of occurances each class
  for k in range(numCentroids):
    k_counts.append(0)
  numRows=df_Xinput.shape[0]
  numCol=df_Xinput.shape[1]
- mc=df_centroids
- mc[:] = 0
+ df_meanCentroid=df_centroids
+ df_meanCentroid[:] = 0 
  
  #talle column values and take k count
  for row in range(numRows):
@@ -73,13 +77,13 @@ def getCentroid(df_centroids,df_Xinput,list_clusterAssign):
    k_counts[Addr]+=1
    for col in range(numCol):
      Sum= Xrow[col]
-     mc.iloc[Addr,col]+=Sum
+     df_meanCentroid.iloc[Addr,col]+=Sum
  for k in range(numCentroids):
    for col in range(numCol): 
-     value=mc.iloc[k,col]
+     value=df_meanCentroid.iloc[k,col]
      D=k_counts[k]
-     mc.iloc[k,col]= (value/D)
- return mc
+     df_meanCentroid.iloc[k,col]= (value/D)
+ return df_meanCentroid
 
 #precondiotion: 
 #   df_centoid has been initialized with k rows x feature
@@ -101,33 +105,43 @@ def k_means(df_Xinput, int_k,df_centroids):
     df_centroids=getCentroid(df_centroids,df_Xinput,list_clustAssign)
   return list_clustAssign
 
-def Gatherclasses(data,classranges):
- classes = data.iloc[:,4].values
- length = data.iloc[:,4].size
- classranges.append(0)
+#precondition: 
+#   df_data is sorted by column 4 and column 4 cotains class labels
+#postcondition:
+#   list_classranges has been cleared and filled with new ranges
+def Gatherclasses(df_data,list_classranges):
+ list_classranges.clear()
+ classes = df_data.iloc[:,4].values
+ length = df_data.iloc[:,4].size
+ list_classranges.append(0)
  flowertype=classes[0]
 
  for count in range(length):
   if(flowertype!=classes[count]):
-    classranges.append(count)
+    list_classranges.append(count)
     flowertype=classes[count]
- classranges.append(length)
+ list_classranges.append(length)
  return
 
 #precondition:
+#   df_centroids:  centrods
+#   df: datatable with cluster assignments
 #postcondition:
-def computeSSE(centroids,df):
+#   returns the SSE https://hlab.stanford.edu/brian/error_sum_of_squares.html
+#   df has been sorted 
+def computeSSE(df_centroids,df):
+    
  df.sort_values("class", inplace=True)
- classranges=[]
- Gatherclasses(df,classranges)
+ list_classranges=[]
+ Gatherclasses(df,list_classranges)
 
  Sum=0
- for everycluster in range(len(classranges)-1):
+ for everycluster in range(len(list_classranges)-1):
     temp=0
-    cluster=df.iloc[classranges[everycluster]:classranges[everycluster+1],:-1]
+    df_cluster=df.iloc[list_classranges[everycluster]:list_classranges[everycluster+1],:-1]
     numRows=cluster.shape[0]
     for row in range(numRows):
-       dist= minkowskiDist(list(centroids.iloc[everycluster]),list(cluster.iloc[row]),2)
+       dist= minkowskiDist(list(df_centroids.iloc[everycluster]),list(cluster.iloc[row]),2)
        temp+=dist
     Sum+=temp
  return Sum
