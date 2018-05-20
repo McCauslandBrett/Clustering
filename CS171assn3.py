@@ -61,7 +61,7 @@ def getCentroid(df_centroids,df_Xinput,list_clusterAssign):
    k_counts.append(0)
  numRows=df_Xinput.shape[0]
  numCol=df_Xinput.shape[1]
- df_meanCentroid=df_centroids
+ df_meanCentroid=df_centroids.copy()
  df_meanCentroid[:] = 0 
  
  #talle column values and take k count
@@ -182,7 +182,13 @@ def k_meansKneePlot(df_data):
    catch=computeSSE(centroid,df)
    y.append(catch)
    x.append(k)
- plt.scatter(x,y)
+ #plt.scatter(x,y)
+ # multiple line plot
+ plt.plot( x,y, marker='o', markerfacecolor='blue', markersize=8, color='skyblue', linewidth=1)
+ #plt.plot( 'x', 'y2', x,y, marker='', color='olive', linewidth=2)
+ #plt.plot( 'x', 'y3', data=df, marker='', color='olive', linewidth=2, linestyle='dashed', label="toto")
+ #plt.legend()
+
  y.clear()
  x.clear()
  print(df.iloc[0])
