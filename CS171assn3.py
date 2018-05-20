@@ -89,7 +89,7 @@ def getCentroid(df_centroids,df_Xinput,list_clusterAssign):
 #   centroid in invertainly changes value
 def k_means(df_Xinput, int_k,df_centroids):
   
-  max_iteration=5
+  max_iteration=10
   #this is a (data point x 1) vector 
   list_clustAssign=[]
   
@@ -137,7 +137,21 @@ def computeSSE(df_centroids,df):
        dist= minkowskiDist(list(df_centroids.iloc[everycluster]),list(df_cluster.iloc[row]),2)
        Sum+=dist
  return Sum
-  
+def k_meansKneePlot(df_data):
+ x=[]
+ y=[]
+ for k in range(1,11):
+   df_data = df_data.sample(frac=1).reset_index(drop=True)
+   df=df_data.copy()
+   X_input = df_data.iloc[:,:-1].copy()
+   centroid= X_input.iloc[0:k,:].copy()
+   cAssign=k_means(X_input, k,centroid)
+   df.iloc[:,-1]=cAssign
+   catch=computeSSE(centroid,df)
+   y.append(catch)
+   x.append(k)
+ plt.scatter(x,y)  
+ return
 #----------- Question 1: k-Means----------
 # 1)
    #import the data set
@@ -145,12 +159,12 @@ def computeSSE(df_centroids,df):
    #shuffle the data
  data = data.sample(frac=1).reset_index(drop=True)
  #feature matrix input
- X_input = data.iloc[:,:-1]    
- Y_input = data.iloc[ :, -1:]   
+ X_input = data.iloc[:,:-1].copy()   
+ Y_input = data.iloc[ :, -1:].copy()   
  
- df=data  
+ df=data.copy()  
  K=3
- centroid=X_input.iloc[0:K,:]
+ centroid=X_input.iloc[0:K,:].copy()
  save=centroid
  print('centroid',centroid)
  cAssign = k_means(X_input, K,centroid)
@@ -158,18 +172,20 @@ def computeSSE(df_centroids,df):
  data=pd.read_csv('IrisDataSet.csv')
  x=[]
  y=[]
- for k in range(1,5):
+ for k in range(1,11):
    data = data.sample(frac=1).reset_index(drop=True)
-   df=data
-   X_input = data.iloc[:,:-1]
-   centroid=X_input.iloc[0:k,:]
+   df=data.copy()
+   X_input = data.iloc[:,:-1].copy()
+   centroid=X_input.iloc[0:k,:].copy()
    cAssign=k_means(X_input, k,centroid)
    df.iloc[:,-1]=cAssign
    catch=computeSSE(centroid,df)
    y.append(catch)
    x.append(k)
  plt.scatter(x,y)
- 
+ y.clear()
+ x.clear()
+ print(df.iloc[0])
      
 """
  df.sort_values("class", inplace=True)
