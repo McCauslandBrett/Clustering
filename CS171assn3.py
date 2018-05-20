@@ -87,14 +87,14 @@ def getCentroid(df_centroids,df_Xinput,list_clusterAssign):
      #returns a list of cluster assignments where 
      #index maps to df_Xinput 
 #   centroid in invertainly changes value
-def k_means(df_Xinput, int_k,df_centroids):
+def k_means(df_Xinput, int_k,df_centroids,max_iter):
   
-  max_iteration=10
+ 
   #this is a (data point x 1) vector 
   list_clustAssign=[]
   
 # Repeat until nothing is moved around, or some max iteration
-  for iteration in range(max_iteration):
+  for iteration in range(max_iter):
     list_clustAssign=assignClassification(df_centroids,df_Xinput)
     df_centroids=getCentroid(df_centroids,df_Xinput,list_clustAssign)
   return list_clustAssign
@@ -145,58 +145,57 @@ def k_meansKneePlot(df_data):
    df=df_data.copy()
    X_input = df_data.iloc[:,:-1].copy()
    centroid= X_input.iloc[0:k,:].copy()
+   cAssign=k_means(X_input, k,centroid,max_iter=10)
+   df.iloc[:,-1]=cAssign
+   catch=computeSSE(centroid,df)
+   y.append(catch)
+   x.append(k)
+ plt.scatter(x,y)  
+ plt.plot( x,y, marker='o', markerfacecolor='blue', markersize=8, color='skyblue', linewidth=1)
+ plt.title('Knee Plot')
+ plt.ylabel('SSE')
+ plt.xlabel('Clusters')
+ plt.savefig('Knee Plot')
+ return
+def k_meansErrorBarsPlot(df_data,max_iter):
+ x=[]
+ y=[]
+ for k in range(1,11):
+   df_data = df_data.sample(frac=1).reset_index(drop=True)
+   df=df_data.copy()
+   X_input = df_data.iloc[:,:-1].copy()
+   centroid= X_input.iloc[0:k,:].copy()
    cAssign=k_means(X_input, k,centroid)
    df.iloc[:,-1]=cAssign
    catch=computeSSE(centroid,df)
    y.append(catch)
    x.append(k)
  plt.scatter(x,y)  
+ plt.plot( x,y, marker='o', markerfacecolor='blue', markersize=8, color='skyblue', linewidth=1)
+ plt.title('Knee Plot')
+ plt.ylabel('SSE')
+ plt.xlabel('Clusters')
+
  return
 #----------- Question 1: k-Means----------
 # 1)
-   #import the data set
- data=pd.read_csv('IrisDataSet.csv')
-   #shuffle the data
- data = data.sample(frac=1).reset_index(drop=True)
- #feature matrix input
- X_input = data.iloc[:,:-1].copy()   
- Y_input = data.iloc[ :, -1:].copy()   
- 
- df=data.copy()  
+  
+ data=pd.read_csv('IrisDataSet.csv')  #import the data set
+ data = data.sample(frac=1).reset_index(drop=True)   #shuffle the data
+ X_input = data.iloc[:,:-1].copy()   #feature matrix input 
  K=3
  centroid=X_input.iloc[0:K,:].copy()
- save=centroid
- print('centroid',centroid)
  cAssign = k_means(X_input, K,centroid)
- #----------- Question 2: k-Means Evaluation----------
- data=pd.read_csv('IrisDataSet.csv')
- x=[]
- y=[]
- for k in range(1,11):
-   data = data.sample(frac=1).reset_index(drop=True)
-   df=data.copy()
-   X_input = data.iloc[:,:-1].copy()
-   centroid=X_input.iloc[0:k,:].copy()
-   cAssign=k_means(X_input, k,centroid)
-   df.iloc[:,-1]=cAssign
-   catch=computeSSE(centroid,df)
-   y.append(catch)
-   x.append(k)
- #plt.scatter(x,y)
- # multiple line plot
- plt.plot( x,y, marker='o', markerfacecolor='blue', markersize=8, color='skyblue', linewidth=1)
- #plt.plot( 'x', 'y2', x,y, marker='', color='olive', linewidth=2)
- #plt.plot( 'x', 'y3', data=df, marker='', color='olive', linewidth=2, linestyle='dashed', label="toto")
- #plt.legend()
+ #----------- Question 2.1: k-Means Knee Plot ----------
+ data=pd.read_csv('IrisDataSet.csv') 
+ k_meansKneePlot(data)
 
- y.clear()
- x.clear()
- print(df.iloc[0])
-     
-"""
- df.sort_values("class", inplace=True)
- classranges=[]
- Gatherclasses(df,classranges)
- cluster=df.iloc[classranges[0]:classranges[0+1],:-1]
-"""  
+  #----------- Question 2.2: Sensitivity analysis ----------    
+ """repeat the knee plot of sub-question 1, but now, for each value
+ of K you are going to run the algorithm for  max_iter times and record 
+ the mean and standard deviation for the sum of squares of errors
+ for a given K. Plot the new knee plot where now, instead of having 
+ a single point for each K, you are going to have a single point 
+ (the mean) with error-bars (defined by the standard deviation)"""
+ """Create 3 such knee plots for max_iter = 2 ,max_iter = 10 ,max_iter = 100 ."""
   
