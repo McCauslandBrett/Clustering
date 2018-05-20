@@ -87,15 +87,18 @@ def getCentroid(df_centroids,df_Xinput,list_clusterAssign):
      #returns a list of cluster assignments where 
      #index maps to df_Xinput 
 #   centroid in invertainly changes value
-def k_means(df_Xinput, int_k,df_centroids,max_iter):
-  
- 
+def k_means(df_Xinput, int_k,df_centroids):
+   
   #this is a (data point x 1) vector 
   list_clustAssign=[]
-  
+  list_clustAssignPrev=[]
 # Repeat until nothing is moved around, or some max iteration
-  for iteration in range(max_iter):
+  while(True):
     list_clustAssign=assignClassification(df_centroids,df_Xinput)
+    if(list_clustAssign==list_clustAssignPrev):
+        break
+    else:
+      list_clustAssignPrev=list_clustAssign.copy()
     df_centroids=getCentroid(df_centroids,df_Xinput,list_clustAssign)
   return list_clustAssign
 
@@ -145,7 +148,7 @@ def k_meansKneePlot(df_data):
    df=df_data.copy()
    X_input = df_data.iloc[:,:-1].copy()
    centroid= X_input.iloc[0:k,:].copy()
-   cAssign=k_means(X_input, k,centroid,max_iter=10)
+   cAssign=k_means(X_input, k,centroid)
    df.iloc[:,-1]=cAssign
    catch=computeSSE(centroid,df)
    y.append(catch)
@@ -157,19 +160,29 @@ def k_meansKneePlot(df_data):
  plt.xlabel('Clusters')
  plt.savefig('Knee Plot')
  return
+def kmeanspp(df_Xinput, K):
+    df_centroids=[]
+    return df_centroids
 def k_meansErrorBarsPlot(df_data,max_iter):
  x=[]
  y=[]
  for k in range(1,11):
-   df_data = df_data.sample(frac=1).reset_index(drop=True)
-   df=df_data.copy()
-   X_input = df_data.iloc[:,:-1].copy()
-   centroid= X_input.iloc[0:k,:].copy()
-   cAssign=k_means(X_input, k,centroid)
-   df.iloc[:,-1]=cAssign
-   catch=computeSSE(centroid,df)
-   y.append(catch)
-   x.append(k)
+  list_SSE_k=[]
+  for iter in range(max_iter):
+    df_data = df_data.sample(frac=1).reset_index(drop=True)
+    df=df_data.copy()
+    X_input = df_data.iloc[:,:-1].copy()
+    centroid= X_input.iloc[0:k,:].copy()
+    list_cAssign=k_means(X_input, k,centroid)
+    df.iloc[:,-1]=list_cAssign
+    catch=computeSSE(centroid,df)
+    list_SSE_k.append(catch)
+    #for each value K you are going to run the algorithm for  max_iter times and record 
+    #the mean and standard deviation for the sum of squares of errors
+    #for a given K.
+    mean=list_SSE_k
+    y.append(catch)
+    x.append(k)
  plt.scatter(x,y)  
  plt.plot( x,y, marker='o', markerfacecolor='blue', markersize=8, color='skyblue', linewidth=1)
  plt.title('Knee Plot')
@@ -189,7 +202,7 @@ def k_meansErrorBarsPlot(df_data,max_iter):
  #----------- Question 2.1: k-Means Knee Plot ----------
  data=pd.read_csv('IrisDataSet.csv') 
  k_meansKneePlot(data)
-
+ 
   #----------- Question 2.2: Sensitivity analysis ----------    
  """repeat the knee plot of sub-question 1, but now, for each value
  of K you are going to run the algorithm for  max_iter times and record 
@@ -199,3 +212,12 @@ def k_meansErrorBarsPlot(df_data,max_iter):
  (the mean) with error-bars (defined by the standard deviation)"""
  """Create 3 such knee plots for max_iter = 2 ,max_iter = 10 ,max_iter = 100 ."""
   
+ k_meansErrorBarsPlot(df_data,max_iter=2)
+ k_meansErrorBarsPlot(df_data,max_iter=10)
+ k_meansErrorBarsPlot(df_data,max_iter=100)
+ 
+ 
+#-----------  Question 3: K-Means++ Initialization  ----------
+ 
+ 
+ 
