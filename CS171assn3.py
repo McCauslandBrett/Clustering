@@ -161,8 +161,35 @@ def k_meansKneePlot(df_data):
  plt.savefig('Knee Plot')
  return
 def kmeanspp(df_Xinput, K):
-    df_centroids=[]
-    return df_centroids
+ 
+ list_tuple_kdist=[]
+ tuple_nearestCenters=[]
+
+ maxCentroid=K
+ #The exact algorithm is as follows:
+ numRows=df_Xinput.shape[0]
+# S1:Choose one center uniformly at random from among the data points.
+ df_centroids=df_Xinput.iloc[0:1:].copy()
+ 
+# For each data point x, compute D(x), the distance between x and 
+ for centr in range(2,maxCentroid):
+   for row in range(numRows):
+     numCentroids=df_centroids.shape[0]
+     for k in range(numCentroids):
+       dist= minkowskiDist(list(df_centroids.iloc[k]),list(df_Xinput.iloc[row]),2)
+       list_tuple_kdist.append([dist,row])
+     # the nearest center that has already been chosen.
+     list_tuple_kdist.sort(key=operator.itemgetter(0))
+     tuple_nearestCenters.append(list_tuple_kdist[0])#saves {SMest dist,row} of k
+     list_tuple_kdist.clear()
+ # Choose one new data point as a new center, 
+   tuple_nearestCenters.sort(key=operator.itemgetter(0))
+   tuple_centroid=tuple_nearestCenters[-1]#select largest distance tuple
+   rownum=tuple_centroid[1]#select tuples row number
+   df_centroids.loc[centr]=df_Xinput.iloc[rownum,:].copy()#add row in centroids   
+   tuple_nearestCenters.clear() 
+ return df_centroids
+
 def k_meansErrorBarsPlot(df_data,max_iter):
 
  list_mean=[]
@@ -225,28 +252,40 @@ def k_meansErrorBarsPlot(df_data,max_iter):
  data=pd.read_csv('IrisDataSet.csv')  #import the data set
  data = data.sample(frac=1).reset_index(drop=True)   #shuffle the data
  df_Xinput = data.iloc[:,:-1].copy()   #feature matrix input 
- list_tuple_dist=[]
- tuple_nearestCenters=[]
- list_clusterAssignmets=[]
- #The exact algorithm is as follows:
- numRows=df_Xinput.shape[0]
-# S1:Choose one center uniformly at random from among the data points.
- df_centroids=df_Xinput.iloc[0,:].copy()
-# For each data point x, compute D(x), the distance between x and 
- for row in range(numRows):
-   numCentroids=df_centroids.shape[0]
-   for k in range(numCentroids):
-     dist= minkowskiDist(list(df_centroids.iloc[k]),list(df_Xinput.iloc[row]),2)
-     list_tuple_dist.append([dist,k])
-   # the nearest center that has already been chosen.
-   list_tuple_dist.sort(key=operator.itemgetter(0))
-   tuple_nearestCenters.append(list_tuple_dist[0])#list that saves {smallest dist,k}
-# Choose one new data point at random as a new center, 
-# using a weighted probability distribution where a point x 
-# is chosen with probability proportional to D(x)2.
-   list_tuple_dist.clear()
- return list_clusterAssignmets     
+ K=4
+ centroidseed=kmeanspp(df_Xinput, K)
 
+
+
+
+
+
+
+
+
+
+
+
+""" 
+# For each data point x, compute D(x), the distance between x and 
+ for centr in range(2,maxCentroid):
+   for row in range(numRows):
+     numCentroids=df_centroids.shape[0]
+     for k in range(numCentroids):
+       dist= minkowskiDist(list(df_centroids.iloc[k]),list(df_Xinput.iloc[row]),2)
+       list_tuple_kdist.append([dist,row])
+     # the nearest center that has already been chosen.
+     list_tuple_kdist.sort(key=operator.itemgetter(0))
+     tuple_nearestCenters.append(list_tuple_kdist[0])#saves {SMest dist,row} of k
+     list_tuple_kdist.clear()
+ # Choose one new data point as a new center, 
+   tuple_nearestCenters.sort(key=operator.itemgetter(0))
+   tuple_centroid=tuple_nearestCenters[-1]#select largest distance tuple
+   rownum=tuple_centroid[1]#select tuples row number
+   df_centroids.loc[centr]=df_Xinput.iloc[rownum,:].copy()#add row in centroids   
+   tuple_nearestCenters.clear() 
+ return df_centroids    
+"""
 
 
 
@@ -267,5 +306,3 @@ def k_meansErrorBarsPlot(df_data,max_iter):
 # using standard k-means clustering.
  
  
- K=3
- centroid=X_input.iloc[0:K,:].copy()
