@@ -184,7 +184,7 @@ def k_meansErrorBarsPlot(df_data,max_iter):
    list_mean.append(np.mean(list_SSE))# record mean
    list_standardDevation.append(np.std(list_SSE))#record standard deviation
    list_k.append(k)
-
+ plt.figure()
  plt.errorbar(x= list_k, y=list_mean,yerr=list_standardDevation)
  t='k-Means Max Iteration '+str(max_iter)
  plt.title(t)
@@ -222,6 +222,36 @@ def k_meansErrorBarsPlot(df_data,max_iter):
  
  
 #-----------  Question 3: K-Means++ Initialization  ----------
+ data=pd.read_csv('IrisDataSet.csv')  #import the data set
+ data = data.sample(frac=1).reset_index(drop=True)   #shuffle the data
+ df_Xinput = data.iloc[:,:-1].copy()   #feature matrix input 
+ list_tuple_dist=[]
+ tuple_nearestCenters=[]
+ list_clusterAssignmets=[]
+ #The exact algorithm is as follows:
+ numRows=df_Xinput.shape[0]
+# S1:Choose one center uniformly at random from among the data points.
+ df_centroids=df_Xinput.iloc[0,:].copy()
+# For each data point x, compute D(x), the distance between x and 
+ for row in range(numRows):
+   numCentroids=df_centroids.shape[0]
+   for k in range(numCentroids):
+     dist= minkowskiDist(list(df_centroids.iloc[k]),list(df_Xinput.iloc[row]),2)
+     list_tuple_dist.append([dist,k])
+   # the nearest center that has already been chosen.
+   list_tuple_dist.sort(key=operator.itemgetter(0))
+   tuple_nearestCenters.append(list_tuple_dist[0])#list that saves {smallest dist,k}
+
+   list_tuple_dist.clear()
+ return list_clusterAssignmets     
+
+# Choose one new data point at random as a new center, 
+# using a weighted probability distribution where a point x 
+# is chosen with probability proportional to D(x)2.
+# Repeat Steps 2 and 3 until k centers have been chosen.
+# Now that the initial centers have been chosen, proceed 
+# using standard k-means clustering.
  
  
- 
+ K=3
+ centroid=X_input.iloc[0:K,:].copy()
