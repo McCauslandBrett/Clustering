@@ -164,30 +164,34 @@ def kmeanspp(df_Xinput, K):
     df_centroids=[]
     return df_centroids
 def k_meansErrorBarsPlot(df_data,max_iter):
- x=[]
- y=[]
+
+ list_mean=[]
+ list_standardDevation=[]
+ list_k=[]
  for k in range(1,11):
-  list_SSE_k=[]
-  for iter in range(max_iter):
-    df_data = df_data.sample(frac=1).reset_index(drop=True)
-    df=df_data.copy()
-    X_input = df_data.iloc[:,:-1].copy()
-    centroid= X_input.iloc[0:k,:].copy()
-    list_cAssign=k_means(X_input, k,centroid)
-    df.iloc[:,-1]=list_cAssign
-    catch=computeSSE(centroid,df)
-    list_SSE_k.append(catch)
-    #for each value K you are going to run the algorithm for  max_iter times and record 
-    #the mean and standard deviation for the sum of squares of errors
-    #for a given K.
-    mean=list_SSE_k
-    y.append(catch)
-    x.append(k)
- plt.scatter(x,y)  
- plt.plot( x,y, marker='o', markerfacecolor='blue', markersize=8, color='skyblue', linewidth=1)
- plt.title('Knee Plot')
+   list_SSE=[]
+   for iter in range(max_iter):#for each K run the algorithm for  max_iter
+     df_data = df_data.sample(frac=1).reset_index(drop=True)#initialize 
+     df=df_data.copy()#initialize 
+     X_input = df_data.iloc[:,:-1].copy()#initialize feature matrix
+     centroid= X_input.iloc[0:k,:].copy()#initialize k random centroids
+    
+     list_cAssign=k_means(X_input, k,centroid)#k_means cluster assignments
+     df.iloc[:,-1]=list_cAssign #add k_means cluster assignments to df
+     Value_SSE=computeSSE(centroid,df)
+     list_SSE.append(Value_SSE)#record SSE
+   
+   list_mean.append(np.mean(list_SSE))# record mean
+   list_standardDevation.append(np.std(list_SSE))#record standard deviation
+   list_k.append(k)
+
+ plt.errorbar(x= list_k, y=list_mean,yerr=list_standardDevation)
+ t='k-Means Max Iteration '+str(max_iter)
+ plt.title(t)
  plt.ylabel('SSE')
  plt.xlabel('Clusters')
+ plt.savefig(t)
+ plt.close()
 
  return
 #----------- Question 1: k-Means----------
@@ -211,7 +215,7 @@ def k_meansErrorBarsPlot(df_data,max_iter):
  a single point for each K, you are going to have a single point 
  (the mean) with error-bars (defined by the standard deviation)"""
  """Create 3 such knee plots for max_iter = 2 ,max_iter = 10 ,max_iter = 100 ."""
-  
+ df_data=pd.read_csv('IrisDataSet.csv')  #import the data set
  k_meansErrorBarsPlot(df_data,max_iter=2)
  k_meansErrorBarsPlot(df_data,max_iter=10)
  k_meansErrorBarsPlot(df_data,max_iter=100)
