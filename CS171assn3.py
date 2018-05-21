@@ -190,7 +190,7 @@ def kmeanspp(df_Xinput, K):
    tuple_nearestCenters.clear() 
  return df_centroids
 
-def k_meansErrorBarsPlot(df_data,max_iter):
+def k_meansErrorBarsPlot(df_data,max_iter,method):
 
  list_mean=[]
  list_standardDevation=[]
@@ -201,8 +201,10 @@ def k_meansErrorBarsPlot(df_data,max_iter):
      df_data = df_data.sample(frac=1).reset_index(drop=True)#initialize 
      df=df_data.copy()#initialize 
      X_input = df_data.iloc[:,:-1].copy()#initialize feature matrix
-     centroid= X_input.iloc[0:k,:].copy()#initialize k random centroids
-    
+     if(method=="r"):
+      centroid= X_input.iloc[0:k,:].copy()#initialize k random centroids
+     elif(method=="p"):
+      centroid=kmeanspp(X_input, k)
      list_cAssign=k_means(X_input, k,centroid)#k_means cluster assignments
      df.iloc[:,-1]=list_cAssign #add k_means cluster assignments to df
      Value_SSE=computeSSE(centroid,df)
@@ -213,7 +215,10 @@ def k_meansErrorBarsPlot(df_data,max_iter):
    list_k.append(k)
  plt.figure()
  plt.errorbar(x= list_k, y=list_mean,yerr=list_standardDevation)
- t='k-Means Max Iteration '+str(max_iter)
+ if(method=="r"):
+  t='k-Means Max Iteration '+str(max_iter)
+ else:
+  t='k-Mean++ Max Iteration '+str(max_iter)   
  plt.title(t)
  plt.ylabel('SSE')
  plt.xlabel('Clusters')
@@ -230,6 +235,7 @@ def k_meansErrorBarsPlot(df_data,max_iter):
  K=3
  centroid=X_input.iloc[0:K,:].copy()
  cAssign = k_means(X_input, K,centroid)
+ 
  #----------- Question 2.1: k-Means Knee Plot ----------
  data=pd.read_csv('IrisDataSet.csv') 
  k_meansKneePlot(data)
@@ -243,24 +249,25 @@ def k_meansErrorBarsPlot(df_data,max_iter):
  (the mean) with error-bars (defined by the standard deviation)"""
  """Create 3 such knee plots for max_iter = 2 ,max_iter = 10 ,max_iter = 100 ."""
  df_data=pd.read_csv('IrisDataSet.csv')  #import the data set
- k_meansErrorBarsPlot(df_data,max_iter=2)
- k_meansErrorBarsPlot(df_data,max_iter=10)
- k_meansErrorBarsPlot(df_data,max_iter=100)
+ k_meansErrorBarsPlot(df_data,max_iter=2,method="r")
+ k_meansErrorBarsPlot(df_data,max_iter=10,method="r")
+ k_meansErrorBarsPlot(df_data,max_iter=100,method="r")
  
  
-#-----------  Question 3: K-Means++ Initialization  ----------
+#-----------  Question 3.1: K-Means++ Initialization  ----------
  data=pd.read_csv('IrisDataSet.csv')  #import the data set
  data = data.sample(frac=1).reset_index(drop=True)   #shuffle the data
- df_Xinput = data.iloc[:,:-1].copy()   #feature matrix input 
- K=4
- centroidseed=kmeanspp(df_Xinput, K)
+ #K=4
+ #centroidseed=kmeanspp(df_Xinput, K)
+
+ssss
 
 
+#-----------  Question 3.2: K-Means++ Initialization  ----------
 
-
-
-
-
+ k_meansErrorBarsPlot(data,max_iter=2,method="p")
+ k_meansErrorBarsPlot(data,max_iter=10,method="p")
+ k_meansErrorBarsPlot(data,max_iter=100,method="p")
 
 
 
