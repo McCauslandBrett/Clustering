@@ -241,9 +241,23 @@ def k_meansErrorBarsPlot(df_data,max_iter):
    # the nearest center that has already been chosen.
    list_tuple_dist.sort(key=operator.itemgetter(0))
    tuple_nearestCenters.append(list_tuple_dist[0])#list that saves {smallest dist,k}
-
+# Choose one new data point at random as a new center, 
+# using a weighted probability distribution where a point x 
+# is chosen with probability proportional to D(x)2.
    list_tuple_dist.clear()
  return list_clusterAssignmets     
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Choose one new data point at random as a new center, 
 # using a weighted probability distribution where a point x 
