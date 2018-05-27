@@ -74,7 +74,7 @@ def getCentroid(df_centroids,df_Xinput,list_clusterAssign):
      df_meanCentroid.iloc[Addr,col]+=Sum
  for k in range(numCentroids):
    for col in range(numCol): 
-     value=df_meanCentroid.iloc[k,col]
+     value=df_meanCentroid.iloc[k,col] #.value added
      D=k_counts[k]
      df_meanCentroid.iloc[k,col]= (value/D)
  return df_meanCentroid
@@ -92,7 +92,7 @@ def k_means(df_Xinput, int_k,df_centroids):
   #this is a (data point x 1) vector 
   list_clustAssign=[]
   list_clustAssignPrev=[]
-# Repeat until nothing is moved around, or some max iteration
+  #Repeat until nothing is moved around, or some max iteration
   while(True):
     list_clustAssign=assignClassification(df_centroids,df_Xinput)
     if(list_clustAssign==list_clustAssignPrev):
@@ -106,10 +106,11 @@ def k_means(df_Xinput, int_k,df_centroids):
 #   df_data is sorted by column 4 and column 4 cotains class labels
 #postcondition:
 #   list_classranges has been cleared and filled with new ranges
-def Gatherclasses(df_data,list_classranges):
+def Gatherclasses(df_data,list_classranges,classPos):
  list_classranges.clear()
- classes = df_data.iloc[:,4].values
- length = df_data.iloc[:,4].size
+ #classes = df_data.iloc[:,4].values
+ classes = df_data.iloc[:,classPos].values
+ length = df_data.iloc[:,classPos].size
  list_classranges.append(0)
  flowertype=classes[0]
 
@@ -121,7 +122,7 @@ def Gatherclasses(df_data,list_classranges):
  return
 
 #precondition:
-#   df_centroids:  centrods
+#   df_centroids: centrods
 #   df: datatable with cluster assignments
 #postcondition:
 #   returns the SSE https://hlab.stanford.edu/brian/error_sum_of_squares.html
@@ -160,13 +161,15 @@ def k_meansKneePlot(df_data):
  plt.xlabel('Clusters')
  plt.savefig('Knee Plot')
  return
+#precondition: df_Xinput is a dataTable with class labels in the last column
+#postcondition: Retutns
 def kmeanspp(df_Xinput, K):
  
  list_tuple_kdist=[]
  tuple_nearestCenters=[]
 
  maxCentroid=K
- #The exact algorithm is as follows:
+
  numRows=df_Xinput.shape[0]
 # S1:Choose one center uniformly at random from among the data points.
  df_centroids=df_Xinput.iloc[0:1:].copy()
@@ -189,6 +192,23 @@ def kmeanspp(df_Xinput, K):
    df_centroids.loc[centr]=df_Xinput.iloc[rownum,:].copy()#add row in centroids   
    tuple_nearestCenters.clear() 
  return df_centroids
+#precondition: df_Xinput is a shuffled feature matrix
+def sanityCheck(df_Xinput, numCentroids):
+ 
+
+ numRows=df_Xinput.shape[0] # get iteration size
+ df_centroids = df_Xinput.iloc[0:numCentroids,:].copy() # initialze centroids
+ list_clusterAssign=k_means(df_Xinput,numCentroids,df_centroids) #get cluster ASSGNM
+ list_tuple_kdist=[]
+ #for k in range(numCentroids):#for every centroid
+ for row in range(numRows):  #for every data point
+    CentAddr= list_clusterAssign[row]# get centroid index for comparison
+    dist= minkowskiDist(list(df_centroids.iloc[CentAddr]),list(df_Xinput.iloc[row]),2)
+    #if(CentrAddr==0):
+    list_tuple_kdist(CentAddr,append([dist,row]))#save the dist to sort, row for return
+    #list_tuple_kdist.sort(key=operator.itemgetter(0))# sort for smallest dist
+ #df.iloc[:,-1]=cAssign
+ return
 
 def k_meansErrorBarsPlot(df_data,max_iter,method):
 
@@ -232,6 +252,7 @@ def k_meansErrorBarsPlot(df_data,max_iter,method):
  data=pd.read_csv('IrisDataSet.csv')  #import the data set
  data = data.sample(frac=1).reset_index(drop=True)   #shuffle the data
  X_input = data.iloc[:,:-1].copy()   #feature matrix input 
+ 
  K=3
  centroid=X_input.iloc[0:K,:].copy()
  cAssign = k_means(X_input, K,centroid)
@@ -257,10 +278,11 @@ def k_meansErrorBarsPlot(df_data,max_iter,method):
 #-----------  Question 3.1: K-Means++ Initialization  ----------
  data=pd.read_csv('IrisDataSet.csv')  #import the data set
  data = data.sample(frac=1).reset_index(drop=True)   #shuffle the data
- #K=4
- #centroidseed=kmeanspp(df_Xinput, K)
+ K=4
+ X_input = data.iloc[:,:-1].copy()
+ centroidseed=kmeanspp(X_input, K)
 
-ssss
+
 
 
 #-----------  Question 3.2: K-Means++ Initialization  ----------
@@ -269,47 +291,66 @@ ssss
  k_meansErrorBarsPlot(data,max_iter=10,method="p")
  k_meansErrorBarsPlot(data,max_iter=100,method="p")
 
-
-
-
-
-""" 
-# For each data point x, compute D(x), the distance between x and 
- for centr in range(2,maxCentroid):
-   for row in range(numRows):
-     numCentroids=df_centroids.shape[0]
-     for k in range(numCentroids):
-       dist= minkowskiDist(list(df_centroids.iloc[k]),list(df_Xinput.iloc[row]),2)
-       list_tuple_kdist.append([dist,row])
-     # the nearest center that has already been chosen.
-     list_tuple_kdist.sort(key=operator.itemgetter(0))
-     tuple_nearestCenters.append(list_tuple_kdist[0])#saves {SMest dist,row} of k
-     list_tuple_kdist.clear()
- # Choose one new data point as a new center, 
-   tuple_nearestCenters.sort(key=operator.itemgetter(0))
-   tuple_centroid=tuple_nearestCenters[-1]#select largest distance tuple
-   rownum=tuple_centroid[1]#select tuples row number
-   df_centroids.loc[centr]=df_Xinput.iloc[rownum,:].copy()#add row in centroids   
-   tuple_nearestCenters.clear() 
- return df_centroids    
-"""
-
-
-
-
-
-
-
-
-
-
-
-
-# Choose one new data point at random as a new center, 
-# using a weighted probability distribution where a point x 
-# is chosen with probability proportional to D(x)2.
-# Repeat Steps 2 and 3 until k centers have been chosen.
-# Now that the initial centers have been chosen, proceed 
-# using standard k-means clustering.
+#--------Question 4: Top data points per cluster----------------
+ data=pd.read_csv('IrisDataSet.csv')  #import the data set
+ data = data.sample(frac=1).reset_index(drop=True)   #shuffle the data
+ df_Xinput = data.iloc[:,:-1].copy()   #feature matrix input 
+ Y_input= data.iloc[ :, -1:].copy() #class labels
+ listY=Y_input.values.T.tolist()
+ yvalue=listY[0]
+ item=yvalue[0]
+ #list_list_x=[[]]*3
+ #list_list_x[1].append(5)
+ #list_list_x[0].append(5)
+ list_tuple_dist=[]
+ numRows=df_Xinput.shape[0] # get iteration size
+ df_centroids = df_Xinput.iloc[0:3,:].copy() # initialze centroids
+ list_clusterAssign=k_means(df_Xinput,3,df_centroids)#get cluster ASSGNM
  
+ #for k in range(numCentroids):#for every centroid
+ for row in range(numRows):  #for every data point
+   CentAddr= list_clusterAssign[row]# get centroid index for comparison
+   dist= minkowskiDist(list(df_centroids.iloc[CentAddr]),list(df_Xinput.iloc[row]),2)
+   list_tuple_dist.append([dist,row,CentAddr])#save the dist to sort, row for return
+    #list_tuple_kdist.
+ list_tuple_dist.sort(key=operator.itemgetter(2))
+ df=pd.DataFrame(list_tuple_dist)
+ #----------slicing the three classes df->df_c# -> list_c# ------
+ list_classranges=[]
+ Gatherclasses(df,list_classranges,classPos=2)
  
+ classc1=[]
+ classc2=[]
+ classc3=[]
+ 
+ df_c1= df.iloc[list_classranges[0]:list_classranges[1],:]
+ list_c1= df_c1.apply(tuple, axis=1).tolist()
+ list_c1.sort(key=operator.itemgetter(0))
+ df_c1=pd.DataFrame(list_c1)
+ r=df_c1.iloc[0,1]
+ v=Y_input.iloc[:,r]
+ for i in range(3):
+   addr=df_c1.iloc[0,1]
+   classc1.append( Y_input[addr])  
+ df_c2= df.iloc[list_classranges[1]:list_classranges[2],:]
+ list_c2= df_c2.apply(tuple, axis=1).tolist()
+ 
+ df_c3= df.iloc[list_classranges[2]:list_classranges[3],:]
+ list_c3= df_c3.apply(tuple, axis=1).tolist()
+ #----------sort by distance-------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
